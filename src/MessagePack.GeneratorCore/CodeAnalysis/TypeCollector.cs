@@ -33,6 +33,7 @@ namespace MessagePackCompiler.CodeAnalysis
         internal readonly INamedTypeSymbol IgnoreDataMemberAttribute;
         internal readonly INamedTypeSymbol IMessagePackSerializationCallbackReceiver;
         internal readonly INamedTypeSymbol MessagePackFormatterAttribute;
+        internal readonly INamedTypeSymbol IEntitasComponent;
 #pragma warning restore SA1401 // Fields should be private
 
         public ReferenceSymbols(Compilation compilation, Action<string> logger)
@@ -95,6 +96,12 @@ namespace MessagePackCompiler.CodeAnalysis
             if (MessagePackFormatterAttribute == null)
             {
                 throw new InvalidOperationException("failed to get metadata of MessagePack.MessagePackFormatterAttribute");
+            }
+
+            IEntitasComponent = compilation.GetTypeByMetadataName("Entitas.IComponent");
+            if (IEntitasComponent == null)
+            {
+                throw new InvalidOperationException("failed to get metadata of Entitas.IComponent");
             }
         }
     }
@@ -1014,7 +1021,7 @@ namespace MessagePackCompiler.CodeAnalysis
             }
 
             var hasSerializationConstructor = type.AllInterfaces.Any(x => x.ApproximatelyEqual(this.typeReferences.IMessagePackSerializationCallbackReceiver));
-            var isComponent = type.AllInterfaces.Any(x => x.ToDisplayString() == "IComponent");
+            var isComponent = type.AllInterfaces.Any(x => x.ApproximatelyEqual(this.typeReferences.IEntitasComponent));
             var needsCastOnBefore = true;
             var needsCastOnAfter = true;
             if (hasSerializationConstructor)

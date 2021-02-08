@@ -40,9 +40,9 @@ namespace <#= Namespace #>
 <# } #>
 <# } #>
 
-        <#if(objInfo.IsComponent) { #>
+<# if(objInfo.IsComponent) { #>
         private System.Collections.Generic.Stack<IComponent> m_entitasComponentPool = null;
-        <# } #>
+<# } #>
 
         public void Serialize(ref MessagePackWriter writer, <#= objInfo.FullName #> value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -84,12 +84,12 @@ namespace <#= Namespace #>
 <# } #>
             }
 
-            <#if(objInfo.IsComponent) { #>
+<# if(objInfo.IsComponent) { #>
             if (m_entitasComponentPool == null)
             {
                 m_entitasComponentPool = Entitas.ComponentPool.Get<<#= objInfo.FullName #>>();
             }
-            <# } #>
+<# } #>
 
             options.Security.DepthStep(ref reader);
 <# if (isFormatterResolverNecessary) { #>
@@ -117,11 +117,11 @@ namespace <#= Namespace #>
 
             <#= objInfo.FullName #> ____result;
 
-            <#if(objInfo.IsComponent) { #>
+<# if(objInfo.IsComponent) { #>
             if (m_entitasComponentPool != null && m_entitasComponentPool.Count > 0)
                 ____result = m_entitasComponentPool.Pop() as <#= objInfo.FullName #>;
             else
-            <# } #>
+<# } #>
                 ____result = new <#= objInfo.GetConstructorString()  #>;
 
 <# foreach(var x in objInfo.Members.Where(x => x.IsWritable)) { #>

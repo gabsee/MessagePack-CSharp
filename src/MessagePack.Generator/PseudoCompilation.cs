@@ -230,6 +230,11 @@ namespace MessagePack
         void OnAfterDeserialize();
     }
 }
+
+namespace Entitas;
+{
+    public interface IComponent {}
+}
 ";
     }
 }
