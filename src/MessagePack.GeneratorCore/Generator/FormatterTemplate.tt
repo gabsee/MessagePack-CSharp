@@ -24,6 +24,8 @@ namespace <#= Namespace #>
     using System;
     using System.Buffers;
     using MessagePack;
+    using Entitas;
+
 <# foreach(var objInfo in ObjectSerializationInfos) {
     bool isFormatterResolverNecessary = ShouldUseFormatterResolverHelper.ShouldUseFormatterResolver(objInfo.Members);#>
 
@@ -37,6 +39,10 @@ namespace <#= Namespace #>
         <#= item.CustomFormatterTypeName #> __<#= item.Name #>CustomFormatter__ = new <#= item.CustomFormatterTypeName #>();
 <# } #>
 <# } #>
+
+        <#if(objInfo.IsComponent) { #>
+        private System.Collections.Generic.Stack<IComponent> m_entitasComponentPool = null;
+        <# } #>
 
         public void Serialize(ref MessagePackWriter writer, <#= objInfo.FullName #> value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -78,6 +84,13 @@ namespace <#= Namespace #>
 <# } #>
             }
 
+            <#if(objInfo.IsComponent) { #>
+            if (m_entitasComponentPool == null)
+            {
+                m_entitasComponentPool = Entitas.ComponentPool.Get<<#= objInfo.FullName #>>();
+            }
+            <# } #>
+
             options.Security.DepthStep(ref reader);
 <# if (isFormatterResolverNecessary) { #>
             IFormatterResolver formatterResolver = options.Resolver;
@@ -102,7 +115,15 @@ namespace <#= Namespace #>
                 }
             }
 
-            var ____result = new <#= objInfo.GetConstructorString()  #>;
+            <#= objInfo.FullName #> ____result;
+
+            <#if(objInfo.IsComponent) { #>
+            if (m_entitasComponentPool != null && m_entitasComponentPool.Count > 0)
+                ____result = m_entitasComponentPool.Pop() as <#= objInfo.FullName #>;
+            else
+            <# } #>
+                ____result = new <#= objInfo.GetConstructorString()  #>;
+
 <# foreach(var x in objInfo.Members.Where(x => x.IsWritable)) { #>
             ____result.<#= x.Name #> = __<#= x.Name #>__;
 <# } #>

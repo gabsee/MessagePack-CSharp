@@ -43,7 +43,8 @@ namespace MessagePackCompiler.Generator
 
 namespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Namespace));
-            this.Write("\r\n{\r\n    using System;\r\n    using System.Buffers;\r\n    using MessagePack;\r\n");
+            this.Write("\r\n{\r\n    using System;\r\n    using System.Buffers;\r\n    using MessagePack;\r\n    us" +
+                    "ing Entitas;\r\n\r\n");
  foreach(var objInfo in ObjectSerializationInfos) {
     bool isFormatterResolverNecessary = ShouldUseFormatterResolverHelper.ShouldUseFormatterResolver(objInfo.Members);
             this.Write("\r\n    public sealed class ");
@@ -71,6 +72,11 @@ namespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(item.CustomFormatterTypeName));
             this.Write("();\r\n");
  } 
+ } 
+            this.Write("\r\n        ");
+if(objInfo.IsComponent) { 
+            this.Write("        private System.Collections.Generic.Stack<IComponent> m_entitasComponentPo" +
+                    "ol = null;\r\n        ");
  } 
             this.Write("\r\n        public void Serialize(ref MessagePackWriter writer, ");
             this.Write(this.ToStringHelper.ToStringWithCulture(objInfo.FullName));
@@ -112,7 +118,14 @@ namespace ");
             this.Write("                throw new InvalidOperationException(\"typecode is null, struct not" +
                     " supported\");\r\n");
  } 
-            this.Write("            }\r\n\r\n            options.Security.DepthStep(ref reader);\r\n");
+            this.Write("            }\r\n\r\n            ");
+if(objInfo.IsComponent) { 
+            this.Write("            if (m_entitasComponentPool == null)\r\n            {\r\n                m" +
+                    "_entitasComponentPool = Entitas.ComponentPool.Get<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(objInfo.FullName));
+            this.Write(">();\r\n            }\r\n            ");
+ } 
+            this.Write("\r\n            options.Security.DepthStep(ref reader);\r\n");
  if (isFormatterResolverNecessary) { 
             this.Write("            IFormatterResolver formatterResolver = options.Resolver;\r\n");
  } 
@@ -136,10 +149,18 @@ namespace ");
             this.Write(";\r\n                        break;\r\n");
  } 
             this.Write("                    default:\r\n                        reader.Skip();\r\n           " +
-                    "             break;\r\n                }\r\n            }\r\n\r\n            var ____res" +
-                    "ult = new ");
+                    "             break;\r\n                }\r\n            }\r\n\r\n            ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(objInfo.FullName));
+            this.Write(" ____result;\r\n\r\n            ");
+if(objInfo.IsComponent) { 
+            this.Write("            if (m_entitasComponentPool != null && m_entitasComponentPool.Count > " +
+                    "0)\r\n                ____result = m_entitasComponentPool.Pop() as ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(objInfo.FullName));
+            this.Write(";\r\n            else\r\n            ");
+ } 
+            this.Write("                ____result = new ");
             this.Write(this.ToStringHelper.ToStringWithCulture(objInfo.GetConstructorString()));
-            this.Write(";\r\n");
+            this.Write(";\r\n\r\n");
  foreach(var x in objInfo.Members.Where(x => x.IsWritable)) { 
             this.Write("            ____result.");
             this.Write(this.ToStringHelper.ToStringWithCulture(x.Name));

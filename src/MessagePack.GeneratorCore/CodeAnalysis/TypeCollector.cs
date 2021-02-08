@@ -1014,6 +1014,7 @@ namespace MessagePackCompiler.CodeAnalysis
             }
 
             var hasSerializationConstructor = type.AllInterfaces.Any(x => x.ApproximatelyEqual(this.typeReferences.IMessagePackSerializationCallbackReceiver));
+            var isComponent = type.AllInterfaces.Any(x => x.ToDisplayString() == "IComponent");
             var needsCastOnBefore = true;
             var needsCastOnAfter = true;
             if (hasSerializationConstructor)
@@ -1036,6 +1037,7 @@ namespace MessagePackCompiler.CodeAnalysis
                 FullName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 Namespace = type.ContainingNamespace.IsGlobalNamespace ? null : type.ContainingNamespace.ToDisplayString(),
                 HasIMessagePackSerializationCallbackReceiver = hasSerializationConstructor,
+                IsComponent = isComponent,
                 NeedsCastOnAfter = needsCastOnAfter,
                 NeedsCastOnBefore = needsCastOnBefore,
             };

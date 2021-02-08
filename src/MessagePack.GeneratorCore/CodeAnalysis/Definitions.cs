@@ -47,6 +47,7 @@ namespace MessagePackCompiler.CodeAnalysis
         public MemberSerializationInfo[] Members { get; set; }
 
         public bool HasIMessagePackSerializationCallbackReceiver { get; set; }
+        public bool IsComponent { get; set; }
 
         public bool NeedsCastOnBefore { get; set; }
 
