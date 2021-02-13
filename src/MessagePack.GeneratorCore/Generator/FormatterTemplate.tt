@@ -41,7 +41,7 @@ namespace <#= Namespace #>
 <# } #>
 
 <# if(objInfo.IsComponent) { #>
-        private System.Collections.Generic.Stack<IComponent> m_entitasComponentPool = null;
+        private System.Collections.Concurrent.ConcurrentBag<IComponent> m_entitasComponentPool = null;
 <# } #>
 
         public void Serialize(ref MessagePackWriter writer, <#= objInfo.FullName #> value, global::MessagePack.MessagePackSerializerOptions options)
@@ -118,8 +118,8 @@ namespace <#= Namespace #>
             <#= objInfo.FullName #> ____result;
 
 <# if(objInfo.IsComponent) { #>
-            if (m_entitasComponentPool != null && m_entitasComponentPool.Count > 0)
-                ____result = m_entitasComponentPool.Pop() as <#= objInfo.FullName #>;
+            if (m_entitasComponentPool.TryTake(out IComponent component))
+                ____result = component as <#= objInfo.FullName #>;
             else
 <# } #>
                 ____result = new <#= objInfo.GetConstructorString()  #>;
